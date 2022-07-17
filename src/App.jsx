@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { ImageGallery } from 'components/ImageGallery/ImageGallery';
 import { Searchbar } from 'components/Searchbar';
 import { api } from './services/image-search-api';
@@ -9,135 +9,126 @@ import { Modal } from 'components/Modal';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-export class App extends Component {
-  state = {
-    searchName: '',
-    page: 1,
-    items: [],
-    openModalObject: null,
-    status: 'idle',
-    isFullImage: false,
-  };
+export const App = () => {
+  const [searchName, setSearchName] = useState('');
+  const [page, setPage] = useState(1);
+  const [items, setItems] = useState([]);
+  const [openModalObject, setOpenModalObject] = useState(null);
+  const [status, setStatus] = useState('idle');
+  const [isFullImage, setIsFullImage] = useState(false);
 
-  componentDidUpdate(_, prevState) {
-    const { searchName, page } = this.state;
-
-    if (
-      prevState.page !== this.state.page ||
-      prevState.searchName !== this.state.searchName
-    ) {
-      this.setState({ status: 'pending' });
-
-      try {
-        api(searchName, page).then(({ totalImage, images }) => {
-          this.setState(prevState => {
-            if (totalImage === 0) {
-              toast.error('Nothing found');
-              return {
-                status: 'rejected',
-              };
-            }
-
-            if (totalImage === prevState.items.length) {
-              return {
-                isFullImage: true,
-                items: [...prevState.items, ...images],
-                status: 'resolved',
-              };
-            }
-
-            return {
-              items: [...prevState.items, ...images],
-              status: 'resolved',
-            };
-          });
-        });
-      } catch (error) {
-        this.setState({ status: 'rejected' });
-      }
+  useEffect(() => {
+    if (searchName === '') {
+      return;
     }
-  }
 
-  hendeleSubmitSearchForm = ({ name }) => {
+    setStatus('pending');
+
+    try {
+      api(searchName, page).then(({ totalImage, images }) => {
+        if (totalImage === 0) {
+          toast.error('Nothing found');
+          setStatus('rejected');
+          return;
+        }
+
+        setItems(prevState => {
+          if (totalImage === prevState.length) {
+            setIsFullImage(true);
+            setItems([...prevState, ...images]);
+            setStatus('rejected');
+
+            return;
+          }
+
+          setItems([...prevState, ...images]);
+          setStatus('rejected');
+
+          return;
+        });
+      });
+    } catch (error) {
+      setStatus('rejected');
+    }
+  }, [page, searchName]);
+
+  const hendeleSubmitSearchForm = ({ name }) => {
     const validName = name.trim();
     if (validName === '') {
       toast.error('The search field must be filled');
       return;
     }
 
-    if (this.state.searchName === validName) {
+    if (searchName === validName) {
       toast.error('Replace the search term');
       return;
     }
 
-    this.setState({
-      searchName: validName,
-      page: 1,
-      items: [],
-      openModalObject: null,
-      status: 'idle',
-      isFullImage: false,
-    });
+    setSearchName(validName);
+    setPage(1);
+    setItems([]);
+    setOpenModalObject(null);
+    setStatus('idle');
+    setIsFullImage(false);
   };
 
-  hendleOpenModal = (url, alt) => {
+  const hendleOpenModal = (url, alt) => {
     const modalObject = {
       url,
       alt,
     };
-    this.setState({ openModalObject: modalObject });
+    setOpenModalObject(modalObject);
   };
 
-  closeModal = () => {
-    this.setState({ openModalObject: null });
+  const closeModal = () => {
+    setOpenModalObject(null);
   };
 
-  loadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const loadMore = () => {
+    setPage(prevState => prevState + 1);
   };
 
-  render() {
-    const { items, openModalObject, status, isFullImage } = this.state;
-    if (status === 'idle') {
-      return <Searchbar onSubmit={this.hendeleSubmitSearchForm} />;
-    }
-
-    if (status === 'pending') {
-      return (
-        <>
-          <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
-
-          <ImageGallery items={items} hendleOpenModal={this.hendleOpenModal} />
-          <Loader />
-          {items.length !== 0 && !isFullImage && (
-            <Button onClick={this.loadMore}>Load More</Button>
-          )}
-        </>
-      );
-    }
-
-    if (status === 'resolved') {
-      return (
-        <>
-          <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
-
-          <ImageGallery items={items} hendleOpenModal={this.hendleOpenModal} />
-
-          {openModalObject && (
-            <Modal image={openModalObject} closeModal={this.closeModal} />
-          )}
-
-          {items.length !== 0 && !isFullImage && (
-            <Button onClick={this.loadMore}>Load More</Button>
-          )}
-        </>
-      );
-    }
-
-    if (status === 'rejected') {
-      return <Searchbar onSubmit={this.hendeleSubmitSearchForm} />;
-    }
+  if (status === 'idle') {
+    return (
+      <>
+        <Searchbar onSubmit={hendeleSubmitSearchForm} />
+      </>
+    );
   }
-}
+
+  if (status === 'panding') {
+    return (
+      <>
+        <Searchbar onSubmit={hendeleSubmitSearchForm} />
+
+        <ImageGallery items={items} hendleOpenModal={hendleOpenModal} />
+
+        <Loader />
+      </>
+    );
+  }
+
+  if (status === 'rejected') {
+    return (
+      <>
+        <Searchbar onSubmit={hendeleSubmitSearchForm} />
+
+        <ImageGallery items={items} hendleOpenModal={hendleOpenModal} />
+
+        {openModalObject && (
+          <Modal image={openModalObject} closeModal={closeModal} />
+        )}
+
+        {!isFullImage && <Button onClick={loadMore}>Load More</Button>}
+      </>
+    );
+  }
+
+  if (status === 'rejected') {
+    return (
+      <>
+        <Searchbar onSubmit={hendeleSubmitSearchForm} />
+      </>
+    );
+  }
+};
