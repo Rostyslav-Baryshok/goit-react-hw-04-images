@@ -9,12 +9,19 @@ import { Modal } from 'components/Modal';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+const Status = {
+  IDLE: 'idle',
+  PENDING: 'pending',
+  RESOLVED: 'resolved',
+  REJECTED: 'rejected',
+};
+
 export const App = () => {
   const [searchName, setSearchName] = useState('');
   const [page, setPage] = useState(1);
   const [items, setItems] = useState([]);
   const [openModalObject, setOpenModalObject] = useState(null);
-  const [status, setStatus] = useState('idle');
+  const [status, setStatus] = useState(Status.IDLE);
   const [isFullImage, setIsFullImage] = useState(false);
 
   useEffect(() => {
@@ -22,13 +29,13 @@ export const App = () => {
       return;
     }
 
-    setStatus('pending');
+    setStatus(Status.PENDING);
 
     try {
       api(searchName, page).then(({ totalImage, images }) => {
         if (totalImage === 0) {
           toast.error('Nothing found');
-          setStatus('rejected');
+          setStatus(Status.REJECTED);
           return;
         }
 
@@ -36,19 +43,19 @@ export const App = () => {
           if (totalImage === prevState.length) {
             setIsFullImage(true);
             setItems([...prevState, ...images]);
-            setStatus('rejected');
+            setStatus(Status.RESOLVED);
 
             return;
           }
 
           setItems([...prevState, ...images]);
-          setStatus('rejected');
+          setStatus(Status.RESOLVED);
 
           return;
         });
       });
     } catch (error) {
-      setStatus('rejected');
+      setStatus(Status.REJECTED);
     }
   }, [page, searchName]);
 
@@ -68,7 +75,7 @@ export const App = () => {
     setPage(1);
     setItems([]);
     setOpenModalObject(null);
-    setStatus('idle');
+    setStatus(Status.IDLE);
     setIsFullImage(false);
   };
 
@@ -88,7 +95,7 @@ export const App = () => {
     setPage(prevState => prevState + 1);
   };
 
-  if (status === 'idle') {
+  if (status === Status.IDLE) {
     return (
       <>
         <Searchbar onSubmit={hendeleSubmitSearchForm} />
@@ -96,7 +103,7 @@ export const App = () => {
     );
   }
 
-  if (status === 'panding') {
+  if (status === Status.PENDING) {
     return (
       <>
         <Searchbar onSubmit={hendeleSubmitSearchForm} />
@@ -108,7 +115,7 @@ export const App = () => {
     );
   }
 
-  if (status === 'rejected') {
+  if (status === Status.RESOLVED) {
     return (
       <>
         <Searchbar onSubmit={hendeleSubmitSearchForm} />
@@ -124,7 +131,7 @@ export const App = () => {
     );
   }
 
-  if (status === 'rejected') {
+  if (status === Status.REJECTED) {
     return (
       <>
         <Searchbar onSubmit={hendeleSubmitSearchForm} />
