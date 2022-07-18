@@ -1,10 +1,8 @@
 import axios from 'axios';
-
-const API_KEY = '28599383-28206a1b3fc5a66896effd792';
-axios.defaults.baseURL = 'https://pixabay.com/api/';
+import { API_KEY, BASE_URL } from 'constans/apiConstans';
 
 export const api = async (name, page) => {
-  const res = await axios.get('', {
+  const res = await axios.get(BASE_URL, {
     params: {
       q: name,
       page: page,
