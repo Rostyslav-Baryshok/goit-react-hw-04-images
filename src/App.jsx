@@ -32,8 +32,8 @@ export const App = () => {
     setStatus(Status.PENDING);
 
     async function getImeges() {
-      try {
-        api(searchName, page).then(({ totalImage, images }) => {
+      api(searchName, page)
+        .then(({ totalImage, images }) => {
           if (totalImage === 0) {
             toast.error('Nothing found');
             setStatus(Status.REJECTED);
@@ -54,11 +54,13 @@ export const App = () => {
 
             return;
           });
+        })
+        .catch(error => {
+          setStatus(Status.REJECTED);
+          return error;
         });
-      } catch (error) {
-        setStatus(Status.REJECTED);
-      }
     }
+
     getImeges();
   }, [page, searchName]);
 
