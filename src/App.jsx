@@ -59,7 +59,7 @@ export const App = __ => {
     }
   }, [page, searchName]);
 
-  const hendeleSubmitSearchForm = ({ name }) => {
+  const hendleSubmitSearchForm = ({ name }) => {
     const validName = name.trim();
     if (validName === '') {
       toast.warn('The search field must be filled');
@@ -95,78 +95,38 @@ export const App = __ => {
     setPage(prevState => prevState + 1);
   };
 
-  ////////////////////////////////////////
-  // {
-  //   (() => {
-  //     switch (status) {
-  //       case Status.IDLE:
-  //         return <Searchbar onSubmit={hendeleSubmitSearchForm} />;
-  //       case Status.PENDING:
-  //         return (
-  //           <>
-  //             <Searchbar onSubmit={hendeleSubmitSearchForm} />
+  return (() => {
+    switch (status) {
+      case Status.IDLE:
+        return <Searchbar onSubmit={hendleSubmitSearchForm} />;
+      case Status.PENDING:
+        return (
+          <>
+            <Searchbar onSubmit={hendleSubmitSearchForm} />
 
-  //             <ImageGallery items={items} hendleOpenModal={hendleOpenModal} />
+            <ImageGallery items={items} hendleOpenModal={hendleOpenModal} />
 
-  //             <Loader />
-  //           </>
-  //         );
-  //       case Status.RESOLVED:
-  //         return (
-  //           <>
-  //             <Searchbar onSubmit={hendeleSubmitSearchForm} />
+            <Loader />
+          </>
+        );
+      case Status.RESOLVED:
+        return (
+          <>
+            <Searchbar onSubmit={hendleSubmitSearchForm} />
 
-  //             <ImageGallery items={items} hendleOpenModal={hendleOpenModal} />
+            <ImageGallery items={items} hendleOpenModal={hendleOpenModal} />
 
-  //             {openModalObject && (
-  //               <Modal image={openModalObject} closeModal={closeModal} />
-  //             )}
+            {openModalObject && (
+              <Modal image={openModalObject} closeModal={closeModal} />
+            )}
 
-  //             {!isFullImage && <Button onClick={loadMore}>Load More</Button>}
-  //           </>
-  //         );
-  //       case Status.REJECTED:
-  //         return <Searchbar onSubmit={hendeleSubmitSearchForm} />;
-  //       default:
-  //         return null;
-  //     }
-  //   })();
-  // }
-  //////////////////////////////////////////
-
-  if (status === Status.IDLE) {
-    return <Searchbar onSubmit={hendeleSubmitSearchForm} />;
-  }
-
-  if (status === Status.PENDING) {
-    return (
-      <>
-        <Searchbar onSubmit={hendeleSubmitSearchForm} />
-
-        <ImageGallery items={items} hendleOpenModal={hendleOpenModal} />
-
-        <Loader />
-      </>
-    );
-  }
-
-  if (status === Status.RESOLVED) {
-    return (
-      <>
-        <Searchbar onSubmit={hendeleSubmitSearchForm} />
-
-        <ImageGallery items={items} hendleOpenModal={hendleOpenModal} />
-
-        {openModalObject && (
-          <Modal image={openModalObject} closeModal={closeModal} />
-        )}
-
-        {!isFullImage && <Button onClick={loadMore}>Load More</Button>}
-      </>
-    );
-  }
-
-  if (status === Status.REJECTED) {
-    return <Searchbar onSubmit={hendeleSubmitSearchForm} />;
-  }
+            {!isFullImage && <Button onClick={loadMore}>Load More</Button>}
+          </>
+        );
+      case Status.REJECTED:
+        return <Searchbar onSubmit={hendleSubmitSearchForm} />;
+      default:
+        return <></>;
+    }
+  })();
 };
