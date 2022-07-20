@@ -16,7 +16,7 @@ const Status = {
   REJECTED: 'rejected',
 };
 
-export const App = __ => {
+export const App = () => {
   const [searchName, setSearchName] = useState('');
   const [page, setPage] = useState(1);
   const [items, setItems] = useState([]);
