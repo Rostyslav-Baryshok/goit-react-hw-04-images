@@ -31,32 +31,35 @@ export const App = () => {
 
     setStatus(Status.PENDING);
 
-    try {
-      api(searchName, page).then(({ totalImage, images }) => {
-        if (totalImage === 0) {
-          toast.error('Nothing found');
-          setStatus(Status.REJECTED);
-          return;
-        }
+    async function getImeges() {
+      try {
+        api(searchName, page).then(({ totalImage, images }) => {
+          if (totalImage === 0) {
+            toast.error('Nothing found');
+            setStatus(Status.REJECTED);
+            return;
+          }
 
-        setItems(prevState => {
-          if (totalImage === prevState.length) {
-            setIsFullImage(true);
+          setItems(prevState => {
+            if (totalImage === prevState.length) {
+              setIsFullImage(true);
+              setItems([...prevState, ...images]);
+              setStatus(Status.RESOLVED);
+
+              return;
+            }
+
             setItems([...prevState, ...images]);
             setStatus(Status.RESOLVED);
 
             return;
-          }
-
-          setItems([...prevState, ...images]);
-          setStatus(Status.RESOLVED);
-
-          return;
+          });
         });
-      });
-    } catch (error) {
-      setStatus(Status.REJECTED);
+      } catch (error) {
+        setStatus(Status.REJECTED);
+      }
     }
+    getImeges();
   }, [page, searchName]);
 
   const hendleSubmitSearchForm = ({ name }) => {
